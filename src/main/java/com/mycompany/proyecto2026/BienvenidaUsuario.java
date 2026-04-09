@@ -18,6 +18,10 @@ public class BienvenidaUsuario extends javax.swing.JFrame {
     public BienvenidaUsuario() {
         initComponents();
         jLabel1.setText("Bienvenido "+Proyecto2026.usuarioLogin.nombre);
+
+        if(!"Administrador".equals(Proyecto2026.usuarioLogin.rol)){
+            jButton3.setVisible(false);
+        }
     }
 
     /**
