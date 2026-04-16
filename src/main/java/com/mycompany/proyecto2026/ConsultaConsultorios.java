@@ -4,8 +4,6 @@
  */
 package com.mycompany.proyecto2026;
 
-import java.util.ArrayList;
-import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -16,34 +14,18 @@ import javax.swing.table.DefaultTableModel;
 public class ConsultaConsultorios extends javax.swing.JFrame {
 
     public Consultorio modificarConsultorio;
-    private ArrayList<Usuario> doctoresDisponibles;
-    private ArrayList<Usuario> secretariasDisponibles;
-    private javax.swing.JPanel panelDoctores;
-    private javax.swing.JPanel panelSecretarias;
-    private ArrayList<JCheckBox> checksDoctores;
-    private ArrayList<JCheckBox> checksSecretarias;
 
     /**
      * Creates new form ConsultaConsultorios
      */
     public ConsultaConsultorios() {
         initComponents();
-
-        panelDoctores = new javax.swing.JPanel();
-        panelDoctores.setLayout(new javax.swing.BoxLayout(panelDoctores, javax.swing.BoxLayout.Y_AXIS));
-        jScrollPane2.setViewportView(panelDoctores);
-
-        panelSecretarias = new javax.swing.JPanel();
-        panelSecretarias.setLayout(new javax.swing.BoxLayout(panelSecretarias, javax.swing.BoxLayout.Y_AXIS));
-        jScrollPane3.setViewportView(panelSecretarias);
-
         llenarTabla();
-        llenarListas();
         jLabel6.setText("Nuevo");
     }
 
     public void llenarTabla() {
-        String[] columnas = {"C\u00f3digo", "Nombre", "Doctores", "Secretarias"};
+        String[] columnas = {"C\u00f3digo", "Nombre"};
         DefaultTableModel modelo = new DefaultTableModel(columnas, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -52,55 +34,11 @@ public class ConsultaConsultorios extends javax.swing.JFrame {
         };
 
         for (Consultorio c : Proyecto2026.consultorios) {
-            StringBuilder docs = new StringBuilder();
-            for (int i = 0; i < c.doctores.size(); i++) {
-                if (i > 0) docs.append(", ");
-                docs.append(c.doctores.get(i).nombre);
-            }
-
-            StringBuilder secs = new StringBuilder();
-            for (int i = 0; i < c.secretarias.size(); i++) {
-                if (i > 0) secs.append(", ");
-                secs.append(c.secretarias.get(i).nombre);
-            }
-
-            Object[] fila = {String.format("%03d", c.codigo), c.nombre, docs.toString(), secs.toString()};
+            Object[] fila = {String.format("%03d", c.codigo), c.nombre};
             modelo.addRow(fila);
         }
 
         jTable1.setModel(modelo);
-    }
-
-    public void llenarListas() {
-        doctoresDisponibles = new ArrayList<>();
-        checksDoctores = new ArrayList<>();
-        panelDoctores.removeAll();
-
-        for (Usuario u : Proyecto2026.usuarios) {
-            if ("Doctor".equals(u.rol)) {
-                doctoresDisponibles.add(u);
-                JCheckBox cb = new JCheckBox(u.nombre);
-                checksDoctores.add(cb);
-                panelDoctores.add(cb);
-            }
-        }
-        panelDoctores.revalidate();
-        panelDoctores.repaint();
-
-        secretariasDisponibles = new ArrayList<>();
-        checksSecretarias = new ArrayList<>();
-        panelSecretarias.removeAll();
-
-        for (Usuario u : Proyecto2026.usuarios) {
-            if ("Secretaria".equals(u.rol)) {
-                secretariasDisponibles.add(u);
-                JCheckBox cb = new JCheckBox(u.nombre);
-                checksSecretarias.add(cb);
-                panelSecretarias.add(cb);
-            }
-        }
-        panelSecretarias.revalidate();
-        panelSecretarias.repaint();
     }
 
     /**
@@ -120,14 +58,8 @@ public class ConsultaConsultorios extends javax.swing.JFrame {
         jButton3 = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jList2 = new javax.swing.JList<>();
         jButton4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -136,13 +68,13 @@ public class ConsultaConsultorios extends javax.swing.JFrame {
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "Title 1", "Title 2"
             }
         ));
         jScrollPane1.setViewportView(jTable1);
@@ -172,25 +104,7 @@ public class ConsultaConsultorios extends javax.swing.JFrame {
 
         jLabel3.setText("Nombre:");
 
-        jLabel4.setText("Doctores:");
-
-        jLabel5.setText("Secretarias:");
-
         jLabel6.setText("");
-
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        jScrollPane2.setViewportView(jList1);
-
-        jList2.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        jScrollPane3.setViewportView(jList2);
 
         jButton4.setText("Guardar");
         jButton4.addActionListener(new java.awt.event.ActionListener() {
@@ -222,10 +136,6 @@ public class ConsultaConsultorios extends javax.swing.JFrame {
                                 .addComponent(jLabel6))
                             .addComponent(jLabel3)
                             .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel5)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jButton4))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 44, Short.MAX_VALUE)
                 .addComponent(jButton1)
@@ -251,14 +161,6 @@ public class ConsultaConsultorios extends javax.swing.JFrame {
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(12, 12, 12)
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(12, 12, 12)
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jButton4)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -279,6 +181,12 @@ public class ConsultaConsultorios extends javax.swing.JFrame {
         int i = jTable1.getSelectedRow();
 
         if (i >= 0) {
+            Consultorio eliminado = Proyecto2026.consultorios.get(i);
+            for (Usuario u : Proyecto2026.usuarios) {
+                if (u.consultorio == eliminado) {
+                    u.consultorio = null;
+                }
+            }
             Proyecto2026.consultorios.remove(i);
             JOptionPane.showMessageDialog(this, "Consultorio eliminado.");
             llenarTabla();
@@ -292,30 +200,8 @@ public class ConsultaConsultorios extends javax.swing.JFrame {
 
         if (i >= 0) {
             modificarConsultorio = Proyecto2026.consultorios.get(i);
-
             jLabel6.setText(String.format("%03d", modificarConsultorio.codigo));
             jTextField1.setText(modificarConsultorio.nombre);
-
-            llenarListas();
-
-            for (int d = 0; d < doctoresDisponibles.size(); d++) {
-                for (Usuario doc : modificarConsultorio.doctores) {
-                    if (doctoresDisponibles.get(d) == doc) {
-                        checksDoctores.get(d).setSelected(true);
-                        break;
-                    }
-                }
-            }
-
-            for (int s = 0; s < secretariasDisponibles.size(); s++) {
-                for (Usuario sec : modificarConsultorio.secretarias) {
-                    if (secretariasDisponibles.get(s) == sec) {
-                        checksSecretarias.get(s).setSelected(true);
-                        break;
-                    }
-                }
-            }
-
         } else {
             JOptionPane.showMessageDialog(this, "Seleccione un consultorio.");
         }
@@ -328,44 +214,22 @@ public class ConsultaConsultorios extends javax.swing.JFrame {
             return;
         }
 
-        ArrayList<Usuario> doctoresSeleccionados = new ArrayList<>();
-        for (int i = 0; i < checksDoctores.size(); i++) {
-            if (checksDoctores.get(i).isSelected()) {
-                doctoresSeleccionados.add(doctoresDisponibles.get(i));
-            }
-        }
-
-        ArrayList<Usuario> secretariasSeleccionadas = new ArrayList<>();
-        for (int i = 0; i < checksSecretarias.size(); i++) {
-            if (checksSecretarias.get(i).isSelected()) {
-                secretariasSeleccionadas.add(secretariasDisponibles.get(i));
-            }
-        }
-
         if (modificarConsultorio != null) {
             modificarConsultorio.nombre = nombre;
-            modificarConsultorio.doctores = doctoresSeleccionados;
-            modificarConsultorio.secretarias = secretariasSeleccionadas;
             JOptionPane.showMessageDialog(this, "Consultorio modificado.");
             llenarTabla();
             modificarConsultorio = null;
             jTextField1.setText("");
             jLabel6.setText("Nuevo");
-            for (JCheckBox cb : checksDoctores) cb.setSelected(false);
-            for (JCheckBox cb : checksSecretarias) cb.setSelected(false);
         } else {
             Consultorio nuevo = new Consultorio();
             nuevo.codigo = Proyecto2026.contadorConsultorios++;
             nuevo.nombre = nombre;
-            nuevo.doctores = doctoresSeleccionados;
-            nuevo.secretarias = secretariasSeleccionadas;
             Proyecto2026.consultorios.add(nuevo);
             JOptionPane.showMessageDialog(this, "Consultorio creado.");
             llenarTabla();
             jTextField1.setText("");
             jLabel6.setText("Nuevo");
-            for (JCheckBox cb : checksDoctores) cb.setSelected(false);
-            for (JCheckBox cb : checksSecretarias) cb.setSelected(false);
         }
     }//GEN-LAST:event_jButton4ActionPerformed
 
@@ -377,14 +241,8 @@ public class ConsultaConsultorios extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JList<String> jList1;
-    private javax.swing.JList<String> jList2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTable jTable1;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables

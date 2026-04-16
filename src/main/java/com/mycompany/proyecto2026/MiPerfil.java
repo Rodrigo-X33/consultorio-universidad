@@ -21,6 +21,12 @@ public class MiPerfil extends javax.swing.JFrame {
         jLabel3.setText(Proyecto2026.usuarioLogin.nombre);
         jLabel5.setText(Proyecto2026.usuarioLogin.rol);
 
+        if (Proyecto2026.usuarioLogin.consultorio != null) {
+            jLabel9.setText(String.format("%03d", Proyecto2026.usuarioLogin.consultorio.codigo) + " - " + Proyecto2026.usuarioLogin.consultorio.nombre);
+        } else {
+            jLabel9.setText("No asignado");
+        }
+
         jLabel8.setText("");
         jLabel8.setForeground(new java.awt.Color(204, 0, 0));
         jLabel8.setFont(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 11));
@@ -41,6 +47,8 @@ public class MiPerfil extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
@@ -58,6 +66,10 @@ public class MiPerfil extends javax.swing.JFrame {
         jLabel4.setText("Rol:");
 
         jLabel5.setText("");
+
+        jLabel7.setText("Consultorio:");
+
+        jLabel9.setText("");
 
         jLabel6.setText("Nueva contrase\u00f1a:");
 
@@ -93,6 +105,10 @@ public class MiPerfil extends javax.swing.JFrame {
                         .addComponent(jLabel4)
                         .addGap(18, 18, 18)
                         .addComponent(jLabel5))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel9))
                     .addComponent(jLabel6)
                     .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -116,6 +132,10 @@ public class MiPerfil extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(jLabel5))
+                .addGap(12, 12, 12)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(jLabel9))
                 .addGap(18, 18, 18)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -175,7 +195,9 @@ public class MiPerfil extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
 }

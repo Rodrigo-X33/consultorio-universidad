@@ -4,8 +4,6 @@
  */
 package com.mycompany.proyecto2026;
 
-import java.util.ArrayList;
-
 /**
  *
  * @author carlos
@@ -14,6 +12,4 @@ public class Consultorio {
 
     public int codigo;
     public String nombre;
-    public ArrayList<Usuario> doctores;
-    public ArrayList<Usuario> secretarias;
 }
