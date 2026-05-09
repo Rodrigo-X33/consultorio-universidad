@@ -4,7 +4,10 @@
  */
 package com.mycompany.proyecto2026;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -97,7 +100,7 @@ import javax.swing.table.DefaultTableModel;
         jLabel6 = new javax.swing.JLabel();
         jComboBox3 = new javax.swing.JComboBox<>();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         jLabel1.setText("Consulta Citas");
 
@@ -124,15 +127,14 @@ import javax.swing.table.DefaultTableModel;
 
         jLabel4.setText("Fecha y hora (dd/MM/yyyy HH:mm)");
 
-        jTextField1.setText("jTextField1");
         jTextField1.addActionListener(this::jTextField1ActionPerformed);
 
         jLabel5.setText("Motivo");
 
-        jTextField2.setText("jTextField2");
         jTextField2.addActionListener(this::jTextField2ActionPerformed);
 
         jButton1.setText("Guardar");
+        jButton1.addActionListener(this::jButton1ActionPerformed);
 
         jButton2.setText("Marcar atendida");
         jButton2.addActionListener(this::jButton2ActionPerformed);
@@ -233,12 +235,78 @@ import javax.swing.table.DefaultTableModel;
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField2ActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        Paciente p = (Paciente) jComboBox1.getSelectedItem();
+        Usuario d = (Usuario) jComboBox2.getSelectedItem();
+        Consultorio co = (Consultorio) jComboBox3.getSelectedItem();
+        String fh = jTextField1.getText().trim();
+        String motivo = jTextField2.getText().trim();
+
+        if (p == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un paciente.");
+            return;
+        }
+        if (d == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un doctor.");
+            return;
+        }
+        if (co == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un consultorio.");
+            return;
+        }
+        if (fh.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Ingrese la fecha y hora.");
+            return;
+        }
+        if (motivo.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Ingrese el motivo.");
+            return;
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        sdf.setLenient(false);
+        try {
+            sdf.parse(fh);
+        } catch (ParseException e) {
+            JOptionPane.showMessageDialog(this, "Fecha inválida. Use dd/MM/yyyy HH:mm");
+            return;
+        }
+
+        Cita nueva = new Cita();
+        nueva.codigo = Proyecto2026.contadorCitas++;
+        nueva.paciente = p;
+        nueva.doctor = d;
+        nueva.consultorio = co;
+        nueva.fechaHora = fh;
+        nueva.motivo = motivo;
+        nueva.estado = "Pendiente";
+        Proyecto2026.citas.add(nueva);
+
+        JOptionPane.showMessageDialog(this, "Cita creada.");
+        llenarTabla();
+        limpiarCampos();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        int i = jTable1.getSelectedRow();
+        if (i < 0) {
+            JOptionPane.showMessageDialog(this, "Seleccione una cita.");
+            return;
+        }
+        Proyecto2026.citas.get(i).estado = "Atendida";
+        JOptionPane.showMessageDialog(this, "Cita marcada como atendida.");
+        llenarTabla();
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
+        int i = jTable1.getSelectedRow();
+        if (i < 0) {
+            JOptionPane.showMessageDialog(this, "Seleccione una cita.");
+            return;
+        }
+        Proyecto2026.citas.remove(i);
+        JOptionPane.showMessageDialog(this, "Cita eliminada.");
+        llenarTabla();
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
@@ -246,8 +314,16 @@ import javax.swing.table.DefaultTableModel;
     }//GEN-LAST:event_jComboBox1ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // TODO add your handling code here:
+        this.dispose();
     }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void limpiarCampos() {
+        jTextField1.setText("");
+        jTextField2.setText("");
+        if (jComboBox1.getItemCount() > 0) jComboBox1.setSelectedIndex(0);
+        if (jComboBox2.getItemCount() > 0) jComboBox2.setSelectedIndex(0);
+        if (jComboBox3.getItemCount() > 0) jComboBox3.setSelectedIndex(0);
+    }
 
     /**
      * @param args the command line arguments
