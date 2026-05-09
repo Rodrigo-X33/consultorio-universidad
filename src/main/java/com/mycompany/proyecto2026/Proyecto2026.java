@@ -16,6 +16,8 @@ public class Proyecto2026 {
     public static int contadorConsultorios = 1;
     public static ArrayList<Paciente> pacientes = new ArrayList<>();
     public static int contadorPacientes = 1;
+    public static ArrayList<Cita> citas = new ArrayList<>();
+    public static int contadorCitas = 1;
     
     public static void main(String[] args) {
         Usuario u = new Usuario();

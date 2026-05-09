@@ -6,19 +6,14 @@ package com.mycompany.proyecto2026;
 
 /**
  *
- * @author carlos
+ * @author rodri
  */
-public class Paciente {
-
+public class Cita {
     public int codigo;
-    public String nombre;
-    public int edad;
-    public double peso;
-    public double estatura;
-    public String telefonos;
-
-    @Override
-    public String toString() {
-        return nombre;
-    }
+    public Paciente paciente;
+    public Usuario doctor;
+    public Consultorio consultorio;
+    public String fechaHora;
+    public String motivo;
+    public String estado;
 }

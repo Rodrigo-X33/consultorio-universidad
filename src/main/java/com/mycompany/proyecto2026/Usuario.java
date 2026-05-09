@@ -14,4 +14,9 @@ public class Usuario {
     public String password;
     public String rol;
     public Consultorio consultorio;
+
+    @Override
+    public String toString() {
+        return nombre;
+    }
 }

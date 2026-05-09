@@ -12,4 +12,9 @@ public class Consultorio {
 
     public int codigo;
     public String nombre;
+
+    @Override
+    public String toString() {
+        return nombre;
+    }
 }
