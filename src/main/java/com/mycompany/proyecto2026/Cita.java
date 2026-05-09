@@ -4,6 +4,8 @@
  */
 package com.mycompany.proyecto2026;
 
+import java.util.Date;
+
 /**
  *
  * @author rodri
@@ -13,7 +15,7 @@ public class Cita {
     public Paciente paciente;
     public Usuario doctor;
     public Consultorio consultorio;
-    public String fechaHora;
+    public Date fechaHora;
     public String motivo;
     public String estado;
 }
