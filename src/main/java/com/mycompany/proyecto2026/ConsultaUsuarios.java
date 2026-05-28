@@ -4,7 +4,13 @@
  */
 package com.mycompany.proyecto2026;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -69,6 +75,7 @@ public class ConsultaUsuarios extends javax.swing.JFrame {
         jTextField1 = new javax.swing.JTextField();
         jTextField2 = new javax.swing.JTextField();
         jButton4 = new javax.swing.JButton();
+        jButton5 = new javax.swing.JButton();
         jComboBox1 = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -128,6 +135,13 @@ public class ConsultaUsuarios extends javax.swing.JFrame {
             }
         });
 
+        jButton5.setText("Cargar CSV");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
+
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Administrador", "Doctor", "Secretaria" }));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -143,7 +157,9 @@ public class ConsultaUsuarios extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jButton3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jButton2))
+                                .addComponent(jButton2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jButton5))
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 375, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(49, 49, 49)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -190,7 +206,8 @@ public class ConsultaUsuarios extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton2)
-                    .addComponent(jButton3))
+                    .addComponent(jButton3)
+                    .addComponent(jButton5))
                 .addContainerGap(7, Short.MAX_VALUE))
         );
 
@@ -291,6 +308,113 @@ public class ConsultaUsuarios extends javax.swing.JFrame {
 
     
 
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Seleccione el archivo CSV de usuarios");
+        chooser.setFileFilter(new FileNameExtensionFilter("Archivos CSV (*.csv)", "csv"));
+        File defaultFile = new File(System.getProperty("user.home"), "Documents/usuarios.csv");
+        if (defaultFile.exists()) {
+            chooser.setSelectedFile(defaultFile);
+        } else {
+            chooser.setCurrentDirectory(new File(System.getProperty("user.home"), "Documents"));
+        }
+
+        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        File archivo = chooser.getSelectedFile();
+        int importados = 0;
+        int omitidos = 0;
+        StringBuilder errores = new StringBuilder();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
+            String linea;
+            int numLinea = 0;
+            while ((linea = br.readLine()) != null) {
+                numLinea++;
+                if (linea.trim().isEmpty()) continue;
+                if (numLinea == 1 && linea.toLowerCase().startsWith("nombre")) continue;
+
+                String[] campos = linea.split(",", -1);
+                if (campos.length < 3) {
+                    omitidos++;
+                    errores.append("Línea ").append(numLinea).append(": columnas insuficientes\n");
+                    continue;
+                }
+
+                String nombre = campos[0].trim();
+                String password = campos[1].trim();
+                String rol = campos[2].trim();
+                String nombreConsultorio = campos.length >= 4 ? campos[3].trim() : "";
+
+                if (nombre.isEmpty() || password.isEmpty()) {
+                    omitidos++;
+                    errores.append("Línea ").append(numLinea).append(": nombre o password vacío\n");
+                    continue;
+                }
+                if (!"Administrador".equals(rol) && !"Doctor".equals(rol) && !"Secretaria".equals(rol)) {
+                    omitidos++;
+                    errores.append("Línea ").append(numLinea).append(": rol inválido '").append(rol).append("'\n");
+                    continue;
+                }
+                if (validarPassword(password) != null) {
+                    omitidos++;
+                    errores.append("Línea ").append(numLinea).append(": password no cumple requisitos\n");
+                    continue;
+                }
+                if (existeUsuario(nombre)) {
+                    omitidos++;
+                    errores.append("Línea ").append(numLinea).append(": usuario '").append(nombre).append("' ya existe\n");
+                    continue;
+                }
+
+                Consultorio consultorio = null;
+                if (!nombreConsultorio.isEmpty()) {
+                    consultorio = buscarConsultorio(nombreConsultorio);
+                    if (consultorio == null) {
+                        omitidos++;
+                        errores.append("Línea ").append(numLinea).append(": consultorio '").append(nombreConsultorio).append("' no encontrado\n");
+                        continue;
+                    }
+                }
+
+                Usuario nuevo = new Usuario();
+                nuevo.nombre = nombre;
+                nuevo.password = password;
+                nuevo.rol = rol;
+                nuevo.consultorio = consultorio;
+                Proyecto2026.usuarios.add(nuevo);
+                importados++;
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Error al leer el archivo: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        llenarTabla();
+        String resumen = "Usuarios importados: " + importados + "\nOmitidos: " + omitidos;
+        if (omitidos > 0) {
+            resumen += "\n\nDetalle:\n" + errores.toString();
+        }
+        JOptionPane.showMessageDialog(this, resumen, "Carga CSV", JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_jButton5ActionPerformed
+
+    private boolean existeUsuario(String nombre) {
+        for (Usuario u : Proyecto2026.usuarios) {
+            if (u.nombre.equalsIgnoreCase(nombre)) return true;
+        }
+        return false;
+    }
+
+    private Consultorio buscarConsultorio(String nombre) {
+        for (Consultorio c : Proyecto2026.consultorios) {
+            if (c.nombre.equalsIgnoreCase(nombre)) return c;
+        }
+        return null;
+    }
+
     private String validarPassword(String password) {
         if (password.length() < 6) {
             return "La contraseña debe tener al menos 6 caracteres.";
@@ -312,6 +436,7 @@ public class ConsultaUsuarios extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
