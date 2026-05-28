@@ -4,9 +4,23 @@
  */
 package com.mycompany.proyecto2026;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  *
@@ -61,6 +75,8 @@ public class ConsultaCitas extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
+        jButton5 = new javax.swing.JButton();
+        jButton6 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -100,6 +116,20 @@ public class ConsultaCitas extends javax.swing.JFrame {
             }
         });
 
+        jButton5.setText("Exportar JSON");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
+
+        jButton6.setText("Exportar XML");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -113,6 +143,10 @@ public class ConsultaCitas extends javax.swing.JFrame {
                         .addComponent(jButton1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButton5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButton6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton3)))
                 .addContainerGap())
@@ -128,6 +162,8 @@ public class ConsultaCitas extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(jButton2)
+                    .addComponent(jButton5)
+                    .addComponent(jButton6)
                     .addComponent(jButton3))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -161,10 +197,113 @@ public class ConsultaCitas extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_jButton3ActionPerformed
 
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        if (Proyecto2026.citas.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay citas para exportar.");
+            return;
+        }
+        File downloads = obtenerCarpetaDownloads();
+        File archivo = new File(downloads, "citas.json");
+        try (FileWriter fw = new FileWriter(archivo)) {
+            fw.write(construirJson());
+            JOptionPane.showMessageDialog(this, "Citas exportadas a:\n" + archivo.getAbsolutePath());
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error al exportar JSON: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        if (Proyecto2026.citas.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay citas para exportar.");
+            return;
+        }
+        File downloads = obtenerCarpetaDownloads();
+        File archivo = new File(downloads, "citas.xml");
+        try {
+            escribirXml(archivo);
+            JOptionPane.showMessageDialog(this, "Citas exportadas a:\n" + archivo.getAbsolutePath());
+        } catch (ParserConfigurationException | TransformerException e) {
+            JOptionPane.showMessageDialog(this, "Error al exportar XML: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private File obtenerCarpetaDownloads() {
+        File downloads = new File(System.getProperty("user.home"), "Downloads");
+        if (!downloads.exists()) downloads.mkdirs();
+        return downloads;
+    }
+
+    private String construirJson() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\n");
+        sb.append("  \"citas\": [\n");
+        for (int i = 0; i < Proyecto2026.citas.size(); i++) {
+            Cita c = Proyecto2026.citas.get(i);
+            sb.append("    {\n");
+            sb.append("      \"codigo\": ").append(c.codigo).append(",\n");
+            sb.append("      \"paciente\": \"").append(escaparJson(c.paciente.nombre)).append("\",\n");
+            sb.append("      \"doctor\": \"").append(escaparJson(c.doctor.nombre)).append("\",\n");
+            sb.append("      \"consultorio\": \"").append(escaparJson(c.consultorio.nombre)).append("\",\n");
+            sb.append("      \"fechaHora\": \"").append(SDF.format(c.fechaHora)).append("\",\n");
+            sb.append("      \"motivo\": \"").append(escaparJson(c.motivo)).append("\",\n");
+            sb.append("      \"estado\": \"").append(escaparJson(c.estado)).append("\"\n");
+            sb.append("    }");
+            if (i < Proyecto2026.citas.size() - 1) sb.append(",");
+            sb.append("\n");
+        }
+        sb.append("  ]\n");
+        sb.append("}\n");
+        return sb.toString();
+    }
+
+    private String escaparJson(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"")
+                .replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
+    }
+
+    private void escribirXml(File archivo) throws ParserConfigurationException, TransformerException {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document doc = db.newDocument();
+
+        Element raiz = doc.createElement("citas");
+        doc.appendChild(raiz);
+
+        for (Cita c : Proyecto2026.citas) {
+            Element ce = doc.createElement("cita");
+            ce.appendChild(crearElemento(doc, "codigo", String.valueOf(c.codigo)));
+            ce.appendChild(crearElemento(doc, "paciente", c.paciente.nombre));
+            ce.appendChild(crearElemento(doc, "doctor", c.doctor.nombre));
+            ce.appendChild(crearElemento(doc, "consultorio", c.consultorio.nombre));
+            ce.appendChild(crearElemento(doc, "fechaHora", SDF.format(c.fechaHora)));
+            ce.appendChild(crearElemento(doc, "motivo", c.motivo));
+            ce.appendChild(crearElemento(doc, "estado", c.estado));
+            raiz.appendChild(ce);
+        }
+
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer t = tf.newTransformer();
+        t.setOutputProperty(OutputKeys.INDENT, "yes");
+        t.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+        t.transform(new DOMSource(doc), new StreamResult(archivo));
+    }
+
+    private Element crearElemento(Document doc, String nombre, String valor) {
+        Element e = doc.createElement(nombre);
+        e.setTextContent(valor == null ? "" : valor);
+        return e;
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
