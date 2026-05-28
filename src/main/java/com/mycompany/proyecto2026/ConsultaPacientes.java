@@ -4,8 +4,22 @@
  */
 package com.mycompany.proyecto2026;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  *
@@ -72,6 +86,8 @@ public class ConsultaPacientes extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
+        jButton5 = new javax.swing.JButton();
+        jButton6 = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -124,6 +140,20 @@ public class ConsultaPacientes extends javax.swing.JFrame {
             }
         });
 
+        jButton5.setText("Exportar JSON");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
+
+        jButton6.setText("Exportar XML");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+
         jLabel2.setText("Código:");
 
         jLabel3.setText("Nombre:");
@@ -158,7 +188,11 @@ public class ConsultaPacientes extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jButton3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jButton2))
+                                .addComponent(jButton2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jButton5)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jButton6))
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 425, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(49, 49, 49)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -222,7 +256,9 @@ public class ConsultaPacientes extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton2)
-                    .addComponent(jButton3))
+                    .addComponent(jButton3)
+                    .addComponent(jButton5)
+                    .addComponent(jButton6))
                 .addContainerGap(7, Short.MAX_VALUE))
         );
 
@@ -340,11 +376,114 @@ public class ConsultaPacientes extends javax.swing.JFrame {
         limpiarCampos();
     }//GEN-LAST:event_jButton4ActionPerformed
 
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        if (Proyecto2026.pacientes.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay pacientes para exportar.");
+            return;
+        }
+        File downloads = obtenerCarpetaDownloads();
+        File archivo = new File(downloads, "pacientes.json");
+        try (FileWriter fw = new FileWriter(archivo)) {
+            fw.write(construirJson());
+            JOptionPane.showMessageDialog(this, "Pacientes exportados a:\n" + archivo.getAbsolutePath());
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error al exportar JSON: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        if (Proyecto2026.pacientes.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay pacientes para exportar.");
+            return;
+        }
+        File downloads = obtenerCarpetaDownloads();
+        File archivo = new File(downloads, "pacientes.xml");
+        try {
+            escribirXml(archivo);
+            JOptionPane.showMessageDialog(this, "Pacientes exportados a:\n" + archivo.getAbsolutePath());
+        } catch (ParserConfigurationException | TransformerException e) {
+            JOptionPane.showMessageDialog(this, "Error al exportar XML: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private File obtenerCarpetaDownloads() {
+        File downloads = new File(System.getProperty("user.home"), "Downloads");
+        if (!downloads.exists()) {
+            downloads.mkdirs();
+        }
+        return downloads;
+    }
+
+    private String construirJson() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\n");
+        sb.append("  \"pacientes\": [\n");
+        for (int i = 0; i < Proyecto2026.pacientes.size(); i++) {
+            Paciente p = Proyecto2026.pacientes.get(i);
+            sb.append("    {\n");
+            sb.append("      \"codigo\": ").append(p.codigo).append(",\n");
+            sb.append("      \"nombre\": \"").append(escaparJson(p.nombre)).append("\",\n");
+            sb.append("      \"edad\": ").append(p.edad).append(",\n");
+            sb.append("      \"peso\": ").append(p.peso).append(",\n");
+            sb.append("      \"estatura\": ").append(p.estatura).append(",\n");
+            sb.append("      \"telefonos\": \"").append(escaparJson(p.telefonos)).append("\"\n");
+            sb.append("    }");
+            if (i < Proyecto2026.pacientes.size() - 1) sb.append(",");
+            sb.append("\n");
+        }
+        sb.append("  ]\n");
+        sb.append("}\n");
+        return sb.toString();
+    }
+
+    private String escaparJson(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"")
+                .replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
+    }
+
+    private void escribirXml(File archivo) throws ParserConfigurationException, TransformerException {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document doc = db.newDocument();
+
+        Element raiz = doc.createElement("pacientes");
+        doc.appendChild(raiz);
+
+        for (Paciente p : Proyecto2026.pacientes) {
+            Element pe = doc.createElement("paciente");
+            pe.appendChild(crearElemento(doc, "codigo", String.valueOf(p.codigo)));
+            pe.appendChild(crearElemento(doc, "nombre", p.nombre));
+            pe.appendChild(crearElemento(doc, "edad", String.valueOf(p.edad)));
+            pe.appendChild(crearElemento(doc, "peso", String.valueOf(p.peso)));
+            pe.appendChild(crearElemento(doc, "estatura", String.valueOf(p.estatura)));
+            pe.appendChild(crearElemento(doc, "telefonos", p.telefonos));
+            raiz.appendChild(pe);
+        }
+
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer t = tf.newTransformer();
+        t.setOutputProperty(OutputKeys.INDENT, "yes");
+        t.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+        t.transform(new DOMSource(doc), new StreamResult(archivo));
+    }
+
+    private Element crearElemento(Document doc, String nombre, String valor) {
+        Element e = doc.createElement(nombre);
+        e.setTextContent(valor == null ? "" : valor);
+        return e;
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
