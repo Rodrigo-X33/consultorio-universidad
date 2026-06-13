@@ -40,6 +40,12 @@ public class ConsultaPacientes extends javax.swing.JFrame {
         initComponents();
         llenarTabla();
         jLabel6.setText("Nuevo");
+
+        // Cargar XML visible para Doctor y Secretaria.
+        String rol = Proyecto2026.usuarioLogin.rol;
+        if (!"Doctor".equals(rol) && !"Secretaria".equals(rol)) {
+            jButton7.setVisible(false);
+        }
     }
 
     public void llenarTabla() {

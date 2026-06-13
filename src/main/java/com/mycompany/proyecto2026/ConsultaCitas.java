@@ -44,6 +44,11 @@ public class ConsultaCitas extends javax.swing.JFrame {
     public ConsultaCitas() {
         initComponents();
         llenarTabla();
+
+        // Cargar JSON visible solo para Secretaria.
+        if (!"Secretaria".equals(Proyecto2026.usuarioLogin.rol)) {
+            jButton4.setVisible(false);
+        }
     }
 
     public void llenarTabla() {
@@ -86,6 +91,7 @@ public class ConsultaCitas extends javax.swing.JFrame {
         jButton5 = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
+        jButton7 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -146,6 +152,13 @@ public class ConsultaCitas extends javax.swing.JFrame {
             }
         });
 
+        jButton7.setText("Receta médica");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -159,6 +172,8 @@ public class ConsultaCitas extends javax.swing.JFrame {
                         .addComponent(jButton1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButton7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -180,6 +195,7 @@ public class ConsultaCitas extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(jButton2)
+                    .addComponent(jButton7)
                     .addComponent(jButton5)
                     .addComponent(jButton6)
                     .addComponent(jButton4)
@@ -215,6 +231,17 @@ public class ConsultaCitas extends javax.swing.JFrame {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         this.dispose();
     }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        int i = jTable1.getSelectedRow();
+        if (i < 0) {
+            JOptionPane.showMessageDialog(this, "Seleccione una cita.");
+            return;
+        }
+        Cita cita = Proyecto2026.citas.get(i);
+        RecetaCita r = new RecetaCita(cita);
+        r.setVisible(true);
+    }//GEN-LAST:event_jButton7ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         if (Proyecto2026.citas.isEmpty()) {
@@ -501,6 +528,7 @@ public class ConsultaCitas extends javax.swing.JFrame {
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;

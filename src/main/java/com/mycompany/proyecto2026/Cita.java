@@ -4,6 +4,7 @@
  */
 package com.mycompany.proyecto2026;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -18,4 +19,5 @@ public class Cita {
     public Date fechaHora;
     public String motivo;
     public String estado;
+    public ArrayList<Medicamento> receta = new ArrayList<>();
 }

@@ -31,6 +31,9 @@ public class BienvenidaUsuario extends javax.swing.JFrame {
             jButton8.setVisible(false);
             jButton9.setVisible(false);
         }
+        if(!"Secretaria".equals(rol)){
+            jButton10.setVisible(false);
+        }
     }
 
     /**
@@ -52,6 +55,7 @@ public class BienvenidaUsuario extends javax.swing.JFrame {
         jButton7 = new javax.swing.JButton();
         jButton8 = new javax.swing.JButton();
         jButton9 = new javax.swing.JButton();
+        jButton10 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -120,6 +124,13 @@ public class BienvenidaUsuario extends javax.swing.JFrame {
             }
         });
 
+        jButton10.setText("Reportes");
+        jButton10.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton10ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -134,7 +145,8 @@ public class BienvenidaUsuario extends javax.swing.JFrame {
                     .addComponent(jButton6)
                     .addComponent(jButton7)
                     .addComponent(jButton9)
-                    .addComponent(jButton8))
+                    .addComponent(jButton8)
+                    .addComponent(jButton10))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 80, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton2)
@@ -163,7 +175,9 @@ public class BienvenidaUsuario extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(jButton9)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton8))
+                        .addComponent(jButton8)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton10))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addGap(80, 80, 80)
                         .addComponent(jButton2)))
@@ -223,9 +237,15 @@ public class BienvenidaUsuario extends javax.swing.JFrame {
         t.setVisible(true);
     }//GEN-LAST:event_jButton9ActionPerformed
 
+    private void jButton10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton10ActionPerformed
+        Reportes t = new Reportes();
+        t.setVisible(true);
+    }//GEN-LAST:event_jButton10ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton10;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
