@@ -7,7 +7,9 @@ package com.mycompany.proyecto2026;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,6 +22,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  *
@@ -101,6 +105,7 @@ public class ConsultaPacientes extends javax.swing.JFrame {
         jTextField4 = new javax.swing.JTextField();
         jTextField5 = new javax.swing.JTextField();
         jButton4 = new javax.swing.JButton();
+        jButton7 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -154,6 +159,13 @@ public class ConsultaPacientes extends javax.swing.JFrame {
             }
         });
 
+        jButton7.setText("Cargar XML");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
+
         jLabel2.setText("Código:");
 
         jLabel3.setText("Nombre:");
@@ -192,7 +204,9 @@ public class ConsultaPacientes extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jButton5)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jButton6))
+                                .addComponent(jButton6)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jButton7))
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 425, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(49, 49, 49)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -258,7 +272,8 @@ public class ConsultaPacientes extends javax.swing.JFrame {
                     .addComponent(jButton2)
                     .addComponent(jButton3)
                     .addComponent(jButton5)
-                    .addComponent(jButton6))
+                    .addComponent(jButton6)
+                    .addComponent(jButton7))
                 .addContainerGap(7, Short.MAX_VALUE))
         );
 
@@ -477,6 +492,96 @@ public class ConsultaPacientes extends javax.swing.JFrame {
         return e;
     }
 
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Seleccione el archivo XML de pacientes");
+        chooser.setFileFilter(new FileNameExtensionFilter("Archivos XML (*.xml)", "xml"));
+        File defaultFile = new File(System.getProperty("user.home"), "Documents/pacientes.xml");
+        if (defaultFile.exists()) {
+            chooser.setSelectedFile(defaultFile);
+        } else {
+            chooser.setCurrentDirectory(new File(System.getProperty("user.home"), "Documents"));
+        }
+        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        File archivo = chooser.getSelectedFile();
+        int importados = 0;
+        int omitidos = 0;
+        StringBuilder errores = new StringBuilder();
+
+        try {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(archivo);
+            doc.getDocumentElement().normalize();
+
+            NodeList nodos = doc.getElementsByTagName("paciente");
+            for (int i = 0; i < nodos.getLength(); i++) {
+                Element el = (Element) nodos.item(i);
+                int numPaciente = i + 1;
+
+                String nombre = obtenerTexto(el, "nombre");
+                String edadTxt = obtenerTexto(el, "edad");
+                String pesoTxt = obtenerTexto(el, "peso");
+                String estaturaTxt = obtenerTexto(el, "estatura");
+                String telefonos = obtenerTexto(el, "telefonos");
+
+                if (nombre.isEmpty()) {
+                    omitidos++;
+                    errores.append("Paciente ").append(numPaciente).append(": nombre vacío\n");
+                    continue;
+                }
+                int edad;
+                double peso, estatura;
+                try {
+                    edad = Integer.parseInt(edadTxt);
+                    peso = Double.parseDouble(pesoTxt);
+                    estatura = Double.parseDouble(estaturaTxt);
+                } catch (NumberFormatException e) {
+                    omitidos++;
+                    errores.append("Paciente ").append(numPaciente).append(": valores numéricos inválidos\n");
+                    continue;
+                }
+                if (edad < 0 || peso <= 0 || estatura <= 0) {
+                    omitidos++;
+                    errores.append("Paciente ").append(numPaciente).append(": valores fuera de rango\n");
+                    continue;
+                }
+
+                Paciente nuevo = new Paciente();
+                nuevo.codigo = Proyecto2026.contadorPacientes++;
+                nuevo.nombre = nombre;
+                nuevo.edad = edad;
+                nuevo.peso = peso;
+                nuevo.estatura = estatura;
+                nuevo.telefonos = telefonos;
+                Proyecto2026.pacientes.add(nuevo);
+                importados++;
+            }
+        } catch (ParserConfigurationException | SAXException | IOException ex) {
+            JOptionPane.showMessageDialog(this, "Error al leer el archivo XML: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        llenarTabla();
+        String resumen = "Pacientes importados: " + importados + "\nOmitidos: " + omitidos;
+        if (omitidos > 0) {
+            resumen += "\n\nDetalle:\n" + errores.toString();
+        }
+        JOptionPane.showMessageDialog(this, resumen, "Carga XML", JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_jButton7ActionPerformed
+
+    private String obtenerTexto(Element padre, String etiqueta) {
+        NodeList lista = padre.getElementsByTagName(etiqueta);
+        if (lista.getLength() == 0 || lista.item(0).getTextContent() == null) {
+            return "";
+        }
+        return lista.item(0).getTextContent().trim();
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
@@ -484,6 +589,7 @@ public class ConsultaPacientes extends javax.swing.JFrame {
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

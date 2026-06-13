@@ -7,8 +7,16 @@ package com.mycompany.proyecto2026;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -77,6 +85,7 @@ public class ConsultaCitas extends javax.swing.JFrame {
         jButton3 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -130,6 +139,13 @@ public class ConsultaCitas extends javax.swing.JFrame {
             }
         });
 
+        jButton4.setText("Cargar JSON");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -147,6 +163,8 @@ public class ConsultaCitas extends javax.swing.JFrame {
                         .addComponent(jButton5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButton4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton3)))
                 .addContainerGap())
@@ -164,6 +182,7 @@ public class ConsultaCitas extends javax.swing.JFrame {
                     .addComponent(jButton2)
                     .addComponent(jButton5)
                     .addComponent(jButton6)
+                    .addComponent(jButton4)
                     .addComponent(jButton3))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -298,10 +317,188 @@ public class ConsultaCitas extends javax.swing.JFrame {
         return e;
     }
 
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Seleccione el archivo JSON de citas");
+        chooser.setFileFilter(new FileNameExtensionFilter("Archivos JSON (*.json)", "json"));
+        File defaultFile = new File(System.getProperty("user.home"), "Documents/citas.json");
+        if (defaultFile.exists()) {
+            chooser.setSelectedFile(defaultFile);
+        } else {
+            chooser.setCurrentDirectory(new File(System.getProperty("user.home"), "Documents"));
+        }
+        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        File archivo = chooser.getSelectedFile();
+        String contenido;
+        try {
+            contenido = new String(Files.readAllBytes(archivo.toPath()), StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Error al leer el archivo JSON: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        List<String> objetos = extraerObjetos(contenido);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        sdf.setLenient(false);
+        int importados = 0;
+        int omitidos = 0;
+        StringBuilder errores = new StringBuilder();
+
+        for (int i = 0; i < objetos.size(); i++) {
+            String obj = objetos.get(i);
+            int num = i + 1;
+
+            String nombrePaciente = extraerValor(obj, "paciente");
+            String nombreDoctor = extraerValor(obj, "doctor");
+            String nombreConsultorio = extraerValor(obj, "consultorio");
+            String fechaTxt = extraerValor(obj, "fechaHora");
+            String motivo = extraerValor(obj, "motivo");
+            String estado = extraerValor(obj, "estado");
+
+            Paciente p = buscarPaciente(nombrePaciente);
+            if (p == null) {
+                omitidos++;
+                errores.append("Cita ").append(num).append(": paciente '").append(nombrePaciente).append("' no existe\n");
+                continue;
+            }
+            Usuario d = buscarDoctor(nombreDoctor);
+            if (d == null) {
+                omitidos++;
+                errores.append("Cita ").append(num).append(": doctor '").append(nombreDoctor).append("' no existe\n");
+                continue;
+            }
+            Consultorio co = buscarConsultorio(nombreConsultorio);
+            if (co == null) {
+                omitidos++;
+                errores.append("Cita ").append(num).append(": consultorio '").append(nombreConsultorio).append("' no existe\n");
+                continue;
+            }
+            Date fh;
+            try {
+                fh = sdf.parse(fechaTxt);
+            } catch (ParseException ex) {
+                omitidos++;
+                errores.append("Cita ").append(num).append(": fecha inválida '").append(fechaTxt).append("'\n");
+                continue;
+            }
+            if (motivo.isEmpty()) {
+                omitidos++;
+                errores.append("Cita ").append(num).append(": motivo vacío\n");
+                continue;
+            }
+
+            Cita nueva = new Cita();
+            nueva.codigo = Proyecto2026.contadorCitas++;
+            nueva.paciente = p;
+            nueva.doctor = d;
+            nueva.consultorio = co;
+            nueva.fechaHora = fh;
+            nueva.motivo = motivo;
+            nueva.estado = (estado.equals("Atendida") || estado.equals("Pendiente")) ? estado : "Pendiente";
+            Proyecto2026.citas.add(nueva);
+            importados++;
+        }
+
+        llenarTabla();
+        String resumen = "Citas importadas: " + importados + "\nOmitidas: " + omitidos;
+        if (omitidos > 0) {
+            resumen += "\n\nDetalle:\n" + errores.toString();
+        }
+        JOptionPane.showMessageDialog(this, resumen, "Carga JSON", JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    // Extrae cada objeto {...} interno (sin llaves anidadas) del JSON.
+    private List<String> extraerObjetos(String json) {
+        List<String> objetos = new ArrayList<>();
+        java.util.Deque<Integer> pila = new java.util.ArrayDeque<>();
+        for (int i = 0; i < json.length(); i++) {
+            char ch = json.charAt(i);
+            if (ch == '{') {
+                pila.push(i);
+            } else if (ch == '}') {
+                if (!pila.isEmpty()) {
+                    int start = pila.pop();
+                    String bloque = json.substring(start, i + 1);
+                    if (bloque.indexOf('{', 1) == -1) {
+                        objetos.add(bloque);
+                    }
+                }
+            }
+        }
+        return objetos;
+    }
+
+    // Extrae el valor (texto o número) asociado a "clave" dentro de un objeto JSON.
+    private String extraerValor(String objeto, String clave) {
+        String patron = "\"" + clave + "\"";
+        int idx = objeto.indexOf(patron);
+        if (idx == -1) {
+            return "";
+        }
+        int colon = objeto.indexOf(':', idx + patron.length());
+        if (colon == -1) {
+            return "";
+        }
+        int p = colon + 1;
+        while (p < objeto.length() && Character.isWhitespace(objeto.charAt(p))) {
+            p++;
+        }
+        if (p >= objeto.length()) {
+            return "";
+        }
+        if (objeto.charAt(p) == '"') {
+            int end = objeto.indexOf('"', p + 1);
+            if (end == -1) {
+                return "";
+            }
+            return objeto.substring(p + 1, end);
+        }
+        int end = p;
+        while (end < objeto.length()
+                && objeto.charAt(end) != ','
+                && objeto.charAt(end) != '}'
+                && !Character.isWhitespace(objeto.charAt(end))) {
+            end++;
+        }
+        return objeto.substring(p, end).trim();
+    }
+
+    private Paciente buscarPaciente(String nombre) {
+        for (Paciente p : Proyecto2026.pacientes) {
+            if (p.nombre.equalsIgnoreCase(nombre)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    private Usuario buscarDoctor(String nombre) {
+        for (Usuario u : Proyecto2026.usuarios) {
+            if ("Doctor".equals(u.rol) && u.nombre.equalsIgnoreCase(nombre)) {
+                return u;
+            }
+        }
+        return null;
+    }
+
+    private Consultorio buscarConsultorio(String nombre) {
+        for (Consultorio c : Proyecto2026.consultorios) {
+            if (c.nombre.equalsIgnoreCase(nombre)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
     private javax.swing.JLabel jLabel1;

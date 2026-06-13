@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<pacientes>
+  <paciente>
+    <codigo>1</codigo>
+    <nombre>Maria Lopez</nombre>
+    <edad>28</edad>
+    <peso>65.0</peso>
+    <estatura>1.65</estatura>
+    <telefonos>5559876543</telefonos>
+  </paciente>
+  <paciente>
+    <codigo>2</codigo>
+    <nombre>Pedro Sanchez</nombre>
+    <edad>45</edad>
+    <peso>80.2</peso>
+    <estatura>1.78</estatura>
+    <telefonos>5555555555</telefonos>
+  </paciente>
+  <paciente>
+    <codigo>3</codigo>
+    <nombre>Ana Garcia</nombre>
+    <edad>35</edad>
+    <peso>58.5</peso>
+    <estatura>1.62</estatura>
+    <telefonos>5551112222</telefonos>
+  </paciente>
+</pacientes>

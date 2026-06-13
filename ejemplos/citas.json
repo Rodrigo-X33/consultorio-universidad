@@ -1,0 +1,31 @@
+{
+  "citas": [
+    {
+      "codigo": 1,
+      "paciente": "Juan Pérez",
+      "doctor": "doctor",
+      "consultorio": "Consultorio 1",
+      "fechaHora": "15/06/2026 10:30",
+      "motivo": "Consulta general",
+      "estado": "Pendiente"
+    },
+    {
+      "codigo": 2,
+      "paciente": "Juan Pérez",
+      "doctor": "doctor",
+      "consultorio": "Consultorio 1",
+      "fechaHora": "16/06/2026 11:00",
+      "motivo": "Seguimiento",
+      "estado": "Atendida"
+    },
+    {
+      "codigo": 3,
+      "paciente": "Juan Pérez",
+      "doctor": "doctor",
+      "consultorio": "Consultorio 1",
+      "fechaHora": "17/06/2026 09:00",
+      "motivo": "Control de presion",
+      "estado": "Pendiente"
+    }
+  ]
+}
